@@ -17,4 +17,5 @@ func NewPeopleRouter(e *gin.Engine) (*router){
 func (p *router) Registry() {
   controller := &controller{}
   p.engine.GET("contagem-pessoas", controller.Count)
+  p.engine.POST("pessoa", controller.Insert)
 }
