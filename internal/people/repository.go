@@ -2,6 +2,8 @@ package people
 
 import (
 	"database/sql"
+	"luizilha/rinha-ilha/internal/types"
+  "github.com/google/uuid"
 )
 
 type repository struct {
@@ -9,8 +11,9 @@ type repository struct {
 }
 
 func NewRepository(dbValue *sql.DB) *repository {
-	return &repository{ DB: dbValue }
+	return &repository{DB: dbValue}
 }
+
 /*
 func (p *repository) AllPeople() ([]types.People, error) {
 	rows, error := p.DB.Query("SELECT id, nickname, name, birthdate, stack FROM people")
@@ -30,14 +33,26 @@ func (p *repository) AllPeople() ([]types.People, error) {
 	return arrayPeople, nil
 }
 */
-func (p *repository) Count() (int, error) {
-  row := p.DB.QueryRow("SELECT count(name) FROM people")
 
-  var count int
-  nError := row.Scan(&count)
-  if (nError != nil) {
-    return 0, nError
+func (p *repository) Insert(people *types.People) (string, error) {
+  var id string
+	row := p.DB.QueryRow("INSERT INTO people(id, name, nickname, birthdate, stack, search) values($1, $2, $3, $4, $5, $6) RETURNING id", 
+    uuid.New().String(), people.Name, people.Nickname, people.Birthdate, people.Stack, people.SearchValue()).Scan(&id)
+
+  if row != nil {
+    return "", row
   }
+  return id, nil
+}
 
-  return count, nil
+func (p *repository) Count() (int, error) {
+	row := p.DB.QueryRow("SELECT count(name) FROM people")
+
+	var count int
+	nError := row.Scan(&count)
+	if nError != nil {
+		return 0, nError
+	}
+
+	return count, nil
 }
