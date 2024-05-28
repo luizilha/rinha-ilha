@@ -2,7 +2,9 @@ package people
 
 import (
 	"luizilha/rinha-ilha/internal/storage"
+	"luizilha/rinha-ilha/internal/types"
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,3 +33,19 @@ func (con *controller) Count(c *gin.Context) {
 
 }
 
+func (con *controller) Insert(c *gin.Context) {
+  db := storage.PostgresConnection()
+  repo := NewRepository(db)
+
+  var newPeople types.People
+  if err0 := c.BindJSON(&newPeople); err0 != nil {
+    c.IndentedJSON(http.StatusBadRequest, err0)
+  }
+  
+  row, err := repo.Insert(&newPeople)
+  if err != nil {
+    c.IndentedJSON(http.StatusBadRequest, err.Error())
+  } else {
+    c.IndentedJSON(http.StatusCreated, row)
+  }
+}
