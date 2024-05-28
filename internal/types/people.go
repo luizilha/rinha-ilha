@@ -7,3 +7,7 @@ type People struct {
 	Birthdate string `json:"birthdate"`
 	Stack     string `json:"stack"`
 }
+
+func (p *People) SearchValue() string {
+  return p.Name + p.Nickname + p.Birthdate
+}
