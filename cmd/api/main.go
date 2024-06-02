@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"luizilha/rinha-ilha/internal/people"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {

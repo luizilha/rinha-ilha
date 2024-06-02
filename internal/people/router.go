@@ -4,18 +4,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type router struct {
-  engine *gin.Engine
+type Router struct {
+	engine *gin.Engine
 }
 
-func NewPeopleRouter(e *gin.Engine) (*router){
-  return &router{
-    engine: e,
-  }
+func NewPeopleRouter(e *gin.Engine) *Router {
+	return &Router{
+		engine: e,
+	}
 }
 
-func (p *router) Registry() {
-  controller := &controller{}
-  p.engine.GET("contagem-pessoas", controller.Count)
-  p.engine.POST("pessoa", controller.Insert)
+func (p *Router) Registry() {
+	controller := &Controller{}
+	p.engine.GET("contagem-pessoas", controller.Count)
+	p.engine.GET("pessoas/:id", controller.FindById)
+	p.engine.POST("pessoa", controller.Insert)
+
 }
