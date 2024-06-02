@@ -1,5 +1,9 @@
 package types
 
+type UriID struct {
+	ID string `uri:"id" binding:"required,uuid"`
+}
+
 type People struct {
 	ID        string `json:"id"`
 	Nickname  string `json:"nickname"`
@@ -9,5 +13,5 @@ type People struct {
 }
 
 func (p *People) SearchValue() string {
-  return p.Name + p.Nickname + p.Birthdate
+	return p.Name + p.Nickname + p.Birthdate
 }
