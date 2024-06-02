@@ -3,49 +3,30 @@ package people
 import (
 	"database/sql"
 	"luizilha/rinha-ilha/internal/types"
-  "github.com/google/uuid"
+
+	"github.com/google/uuid"
 )
 
-type repository struct {
+type Repository struct {
 	*sql.DB
 }
 
-func NewRepository(dbValue *sql.DB) *repository {
-	return &repository{DB: dbValue}
+func NewRepository(dbValue *sql.DB) *Repository {
+	return &Repository{DB: dbValue}
 }
 
-/*
-func (p *repository) AllPeople() ([]types.People, error) {
-	rows, error := p.DB.Query("SELECT id, nickname, name, birthdate, stack FROM people")
-	if error != nil {
-		return nil, error
+func (p *Repository) Insert(people *types.People) (string, error) {
+	var id string
+	row := p.DB.QueryRow("INSERT INTO people(id, name, nickname, birthdate, stack, search) values($1, $2, $3, $4, $5, $6) RETURNING id",
+		uuid.New().String(), people.Name, people.Nickname, people.Birthdate, people.Stack, people.SearchValue()).Scan(&id)
+
+	if row != nil {
+		return "", row
 	}
-
-	var arrayPeople []types.People
-	for rows.Next() {
-		p := types.People{}
-		nError := rows.Scan(&p.ID, &p.Nickname, &p.Name, &p.Birthdate, &p.Stack)
-		if nError != nil {
-			return nil, nError
-		}
-		arrayPeople = append(arrayPeople, p)
-	}
-	return arrayPeople, nil
-}
-*/
-
-func (p *repository) Insert(people *types.People) (string, error) {
-  var id string
-	row := p.DB.QueryRow("INSERT INTO people(id, name, nickname, birthdate, stack, search) values($1, $2, $3, $4, $5, $6) RETURNING id", 
-    uuid.New().String(), people.Name, people.Nickname, people.Birthdate, people.Stack, people.SearchValue()).Scan(&id)
-
-  if row != nil {
-    return "", row
-  }
-  return id, nil
+	return id, nil
 }
 
-func (p *repository) Count() (int, error) {
+func (p *Repository) Count() (int, error) {
 	row := p.DB.QueryRow("SELECT count(name) FROM people")
 
 	var count int
@@ -55,4 +36,27 @@ func (p *repository) Count() (int, error) {
 	}
 
 	return count, nil
+}
+
+func (p *Repository) FindById(id string) (*types.People, error) {
+
+	rows, error := p.DB.Query("SELECT id, name, nickname, birthdate, stack from people p WHERE p.id = $1", id)
+
+	if error != nil {
+		return nil, error
+	}
+
+	var people []types.People
+	for rows.Next() {
+		p := types.People{}
+		nError := rows.Scan(&p.ID, &p.Nickname, &p.Name, &p.Birthdate, &p.Stack)
+		if nError != nil {
+			return nil, nError
+		}
+		people = append(people, p)
+	}
+	if len(people) > 0 {
+		return &people[0], nil
+	}
+	return nil, nil
 }
